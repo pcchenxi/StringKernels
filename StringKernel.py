@@ -6,7 +6,8 @@ class StringKernel():
     def __init__(self, subseq_length, lambda_decay):
         self.n = subseq_length
         self.decay = lambda_decay
-        
+    
+    # Compute K_n(s, t), according to the last line of Definition 2, described at page 424
     def computeK(self, s, t, n):
         if min(len(s),len(t)) < n:
             return 0
@@ -15,6 +16,7 @@ class StringKernel():
         K1sum = sum([self.computeK1(s1, t[:j], n-1) for j, char in enumerate(t) if char == x])
         return self.computeK(s1, t, n) + K1sum*self.decay**2
     
+    # Compute Kprime_i(s, t), according to the efficient computation definition, described at page 425
     def computeK1(self, s, t, i):
         if i == 0:
             return 1
@@ -23,6 +25,7 @@ class StringKernel():
         s1 = s[:-1]
         return self.decay*self.computeK1(s1, t, i) + self.computeK2(s, t, i)
     
+    # Compute Kprimeprime_i(s, t), according to the efficient computation definition, described at page 425
     def computeK2(self, s, t, i):
         if i == 0:
             return 1
@@ -35,7 +38,8 @@ class StringKernel():
             u = t[idx+1:]
             t1 = t[:idx+1]
             return self.decay**(len(u))*self.computeK2(s, t1, i)
-        
+    
+    # Compute the kernel matrix given the documents
     def kernel_matrix(self, docs):
         nbr_docs = len(docs)
         
@@ -48,27 +52,33 @@ class StringKernel():
                 
                 Kmatrix[j,i] = Kmatrix[i,j]
                 j += 1
+
         # Normalize Kmatrix
         diagK = np.diag(Kmatrix)
         Knorm = np.outer(diagK, diagK)
         Khatmatrix = np.true_divide(Kmatrix, np.sqrt(Knorm))
         return Khatmatrix
         
-
 if __name__ == '__main__':
-    subseq_length = 2
+    subseq_length = 3
     decay = 0.5
+    show_time = True
     
-#    docs = ['cat', 'car', 'bat', 'bar']
-    docs = ['wisdom is organized life', 'science is organized knowledge', 'what are you talking about', 'who are you']
+    # Documents
+    # docs = ['cat', 'car', 'bat', 'bar']
+    # docs = ['wisdom is organized life', 'science is organized knowledge', 'what are you talking about', 'who are you']
+    docs = ['wisdom is organized life', 'science is organized knowledge']
+
+    # Computation
     ssk = StringKernel(subseq_length, decay)
-    ts = time()
-    kernel = ssk.kernel_matrix(docs)
-#    Kst = ssk.computeK(docs[0], docs[1], subseq_length)
-#    Kss = ssk.computeK(docs[0], docs[0], subseq_length)
-#    Ktt = ssk.computeK(docs[1], docs[1], subseq_length)
-    tf = time()
-    print(kernel)
-#    print(Kst)
-#    print(Kst/np.sqrt(Kss*Ktt))
-    print(tf-ts)
+    start_time = time()
+    kernel_matrix = ssk.kernel_matrix(docs)
+    end_time = time()
+
+    # Print results
+    print 'Number of documents:', len(docs)
+    print 'Documents:', docs, '\n'
+    print kernel_matrix
+
+    if (show_time):
+        print '\nTime elapsed:', end_time-start_time
