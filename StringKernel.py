@@ -4,11 +4,26 @@ from time import time
 class StringKernel():
     
     def __init__(self, subseq_length, lambda_decay):
+        """ String kernel constructor
+        Args:
+            subseq_length: substring size
+            lambda_decay: decay factor denoted lambda in paper
+        
+        """
         self.n = subseq_length
         self.decay = lambda_decay
     
-    # Compute K_n(s, t), according to the last line of Definition 2, described at page 424
     def computeK(self, s, t, n):
+        """ Compute K_n(s, t), according to the last line of Definition 2, described at page 424
+        
+        Args:
+            s: first string sequence
+            t: second string sequence
+            n: substring length
+            
+        Returns:
+            Recursively computed similarity measure K between s and t 
+        """
         if min(len(s),len(t)) < n:
             return 0
         x = s[-1]
@@ -16,8 +31,18 @@ class StringKernel():
         K1sum = sum([self.computeK1(s1, t[:j], n-1) for j, char in enumerate(t) if char == x])
         return self.computeK(s1, t, n) + K1sum*self.decay**2
     
-    # Compute Kprime_i(s, t), according to the efficient computation definition, described at page 425
     def computeK1(self, s, t, i):
+        """ Compute K'_i(s, t), according to the efficient computation definition, described at page 425
+        
+        Args:
+            s: first string sequence
+            t: second string sequence
+            i: substring length
+            
+        Returns:
+            Returns 1 if i = 0 or 0 if string length is smaller than i or
+            Returns recursively computed auxiliary functions K' and K'' 
+        """
         if i == 0:
             return 1
         elif min(len(s),len(t)) < i:
@@ -25,8 +50,17 @@ class StringKernel():
         s1 = s[:-1]
         return self.decay*self.computeK1(s1, t, i) + self.computeK2(s, t, i)
     
-    # Compute Kprimeprime_i(s, t), according to the efficient computation definition, described at page 425
     def computeK2(self, s, t, i):
+        """ Compute K''_i(s, t), according to the efficient computation definition, described at page 425
+        
+        Args:
+            s: first string sequence
+            t: second string sequence
+            i: substring length
+            
+        Returns:
+            Returns recursively computed auxiliary functions K''  
+        """
         if i == 0:
             return 1
         elif min(len(s),len(t)) < i:
@@ -39,8 +73,15 @@ class StringKernel():
             t1 = t[:idx+1]
             return self.decay**(len(u))*self.computeK2(s, t1, i)
     
-    # Compute the kernel matrix given the documents
-    def kernel_matrix(self, docs):
+    def kernelMatrix(self, docs):
+        """ Compute the full kernel matrix given the documents
+        
+        Args:
+            docs: Row vector with all documents as string sequences
+            
+        Returns:
+            Khatmatrix: Normalized matrix \hat{K}(s,t) from page 425 in paper  
+        """
         nbr_docs = len(docs)
         
         Kmatrix = np.zeros([nbr_docs, nbr_docs])
@@ -49,7 +90,6 @@ class StringKernel():
             j = i
             while(j < nbr_docs):
                 Kmatrix[i,j] = self.computeK(docs[i], docs[j], self.n)
-                
                 Kmatrix[j,i] = Kmatrix[i,j]
                 j += 1
 
@@ -60,19 +100,19 @@ class StringKernel():
         return Khatmatrix
         
 if __name__ == '__main__':
-    subseq_length = 3
+    subseq_length = 2
     decay = 0.5
     show_time = True
     
     # Documents
     # docs = ['cat', 'car', 'bat', 'bar']
-    # docs = ['wisdom is organized life', 'science is organized knowledge', 'what are you talking about', 'who are you']
-    docs = ['wisdom is organized life', 'science is organized knowledge']
+    docs = ['wisdom is organized life', 'science is organized knowledge', 'what are you talking about', 'who are you']
+#    docs = ['wisdom is organized life', 'science is organized knowledge']
 
     # Computation
     ssk = StringKernel(subseq_length, decay)
     start_time = time()
-    kernel_matrix = ssk.kernel_matrix(docs)
+    kernel_matrix = ssk.kernelMatrix(docs)
     end_time = time()
 
     # Print results
