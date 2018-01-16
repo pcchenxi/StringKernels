@@ -6,11 +6,11 @@ class StringKernel():
     def __init__(self, subseq_length, lambda_decay):
         """ String kernel constructor
         Args:
-            subseq_length: substring size
+            substr_length: substring size
             lambda_decay: decay factor denoted lambda in paper
         
         """
-        self.n = subseq_length
+        self.n = substr_length
         self.decay = lambda_decay
     
     def computeK(self, s, t, n):
@@ -40,7 +40,6 @@ class StringKernel():
             i: substring length
             
         Returns:
-            Returns 1 if i = 0 or 0 if string length is smaller than i or
             Returns recursively computed auxiliary functions K' and K'' 
         """
         if i == 0:
@@ -100,7 +99,7 @@ class StringKernel():
         return Khatmatrix
         
 if __name__ == '__main__':
-    subseq_length = 2
+    substr_length = 2
     decay = 0.5
     show_time = True
     
@@ -110,7 +109,7 @@ if __name__ == '__main__':
 #    docs = ['wisdom is organized life', 'science is organized knowledge']
 
     # Computation
-    ssk = StringKernel(subseq_length, decay)
+    ssk = StringKernel(substr_length, decay)
     start_time = time()
     kernel_matrix = ssk.kernelMatrix(docs)
     end_time = time()
