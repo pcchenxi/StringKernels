@@ -3,7 +3,7 @@ from time import time
 
 class StringKernel():
     
-    def __init__(self, subseq_length, lambda_decay):
+    def __init__(self, substr_length, lambda_decay):
         """ String kernel constructor
         Args:
             substr_length: substring size
